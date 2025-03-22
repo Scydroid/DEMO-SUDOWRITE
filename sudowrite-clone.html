@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WriteAssist - AI Writing Assistant</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #f97316;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --gray-light: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background-color: var(--dark);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            color: var(--primary);
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary);
+        }
+
+        .project-list {
+            margin-top: 2rem;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .project-list h3 {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+            padding: 0 1rem;
+        }
+
+        .project {
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            margin-bottom: 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        .project:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .toolbar {
+            padding: 0.75rem 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .tools {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .tool-btn {
+            padding: 0.5rem 1rem;
+            background-color: white;
+            border: 1px solid var(--gray-light);
+            border-radius: 0.25rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .tool-btn:hover {
+            background-color: var(--gray-light);
+        }
+
+        .tool-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .editor-container {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .editor {
+            flex-grow: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .editor-content {
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .ai-panel {
+            width: 350px;
+            border-left: 1px solid var(--gray-light);
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .panel-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .close-panel {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.25rem;
+            color: var(--gray);
+        }
+
+        .ai-option {
+            padding: 1rem;
+            border: 1px solid var(--gray-light);
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .ai-option:hover {
+            border-color: var(--primary);
+            background-color: rgba(99, 102, 241, 0.05);
+        }
+
+        .ai-option h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .ai-option p {
+            font-size: 0.875rem;
+            color: var(--gray);
+        }
+
+        .button {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .button:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .ai-result {
+            border: 1px solid var(--gray-light);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .ai-result-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.25rem 0.5rem;
+            background-color: white;
+            border: 1px solid var(--gray-light);
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .action-btn:hover {
+            background-color: var(--gray-light);
+        }
+
+        #editor-textarea {
+            width: 100%;
+            min-height: 300px;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            resize: none;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="logo">WriteAssist</div>
+            <div class="nav-item active">Projects</div>
+            <div class="nav-item">Templates</div>
+            <div class="nav-item">Settings</div>
+            <div class="project-list">
+                <h3>My Projects</h3>
+                <div class="project">My Novel</div>
+                <div class="project">Short Story Collection</div>
+                <div class="project">Sci-Fi Novel Outline</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="toolbar">
+                <div class="tools">
+                    <div class="tool-btn">File</div>
+                    <div class="tool-btn">Edit</div>
+                    <div class="tool-btn">View</div>
+                </div>
+                <div class="tools">
+                    <div class="tool-btn" id="brainstorm-btn">Brainstorm</div>
+                    <div class="tool-btn" id="twist-btn">Plot Twist</div>
+                    <div class="tool-btn" id="expand-btn">Expand</div>
+                    <div class="tool-btn" id="describe-btn">Describe</div>
+                </div>
+            </div>
+
+            <div class="editor-container">
+                <div class="editor">
+                    <div class="editor-content">
+                        <textarea id="editor-textarea" placeholder="Start writing your story here...">It was a cold night in the city, the kind that makes you wonder why you ever left the warmth of home. Detective Sarah Miller pulled her coat tighter as she approached the crime scene. Yellow police tape fluttered in the breeze, marking off the alley where the body had been found.
+
+"What do we have?" she asked, flashing her badge to the officer standing guard.
+
+"Female victim, early thirties. No ID yet," the officer replied. "Forensics is already inside."
+
+Sarah ducked under the tape, her mind already racing through possibilities. This was the third similar case this month. She was beginning to suspect they weren't dealing with coincidences anymore.</textarea>
+                    </div>
+                </div>
+                <div class="ai-panel" id="ai-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">AI Assistant</div>
+                        <button class="close-panel" id="close-panel">×</button>
+                    </div>
+                    <div id="panel-content">
+                        <!-- This content will change based on the selected AI tool -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to simulate AI responses
+        function generateAIContent(type) {
+            const currentText = document.getElementById('editor-textarea').value;
+            
+            // Different options based on the tool selected
+            let panelContent = '';
+            
+            if (type === 'brainstorm') {
+                panelContent = `
+                    <div class="ai-option">
+                        <h3>What happens next?</h3>
+                        <p>Generate potential plot directions</p>
+                    </div>
+                    <div class="ai-option">
+                        <h3>Character development</h3>
+                        <p>Explore deeper character motivations</p>
+                    </div>
+                    <div class="ai-option">
+                        <h3>World building</h3>
+                        <p>Enhance your story's setting</p>
+                    </div>
+                    <div class="ai-option">
+                        <h3>Theme exploration</h3>
+                        <p>Develop underlying themes and messages</p>
+                    </div>
+                `;
+            } else if (type === 'twist') {
+                panelContent = `
+                    <div class="ai-option">
+                        <h3>Reveal a hidden connection</h3>
+                        <p>Suggest unexpected relationships between characters</p>
+                    </div>
+                    <div class="ai-option">
+                        <h3>Unexpected betrayal</h3>
+                        <p>Generate ideas for a surprising betrayal</p>
+                    </div>
+                    <div class="ai-option">
+                        <h3>Red herring resolution</h3>
+                        <p>Flip expectations by resolving a red herring</p>
+                    </div>
+                    <div class="ai-option">
+                        <h3>Identity revelation</h3>
+                        <p>Suggest shocking identity revelations</p>
+                    </div>
+                `;
+            } else if (type === 'expand') {
+                panelContent = `
+                    <p>Select text in your document to have the AI expand it with additional details, dialogue, or description.</p>
+                    <div class="ai-result">
+                        <p>As Sarah approached the crime scene, the familiar chill of dread settled in her stomach. The alley was narrow and dark, sandwiched between two towering apartment buildings that blocked what little moonlight struggled through the cloudy sky. The scent of rain-soaked garbage mingled with something metallic – blood, she knew from experience.</p>
+                        <div class="ai-result-actions">
+                            <button class="action-btn">Insert</button>
+                            <button class="action-btn">Regenerate</button>
+                            <button class="action-btn">Modify</button>
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'describe') {
+                panelContent = `
+                    <p>What would you like to describe?</p>
+                    <div class="ai-option">
+                        <h3>Character description</h3>
+                        <p>Generate detailed character descriptions</p>
+                    </div>
+                    <div class="ai-option">
+                        <h3>Setting description</h3>
+                        <p>Create vivid scenery and environment details</p>
+                    </div>
+                    <div class="ai-option">
+                        <h3>Action sequence</h3>
+                        <p>Describe dynamic action in detail</p>
+                    </div>
+                    <div class="ai-option">
+                        <h3>Emotional state</h3>
+                        <p>Describe character emotions and feelings</p>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('panel-content').innerHTML = panelContent;
+            
+            // Add event listeners to AI options
+            const aiOptions = document.querySelectorAll('.ai-option');
+            aiOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    simulateAIResponse(option.querySelector('h3').textContent, type);
+                });
+            });
+        }
+        
+        // Simulate AI response when an option is clicked
+        function simulateAIResponse(option, type) {
+            let responseContent = '';
+            
+            if (type === 'brainstorm' && option.includes('What happens next')) {
+                responseContent = `
+                    <h3>What happens next - Ideas:</h3>
+                    <div class="ai-result">
+                        <p>1. Sarah discovers a small, unusual token left by the killer - perhaps a playing card or unique coin - suggesting this is indeed a serial case.</p>
+                        <div class="ai-result-actions">
+                            <button class="action-btn">Insert</button>
+                            <button class="action-btn">Expand</button>
+                        </div>
+                    </div>
+                    <div class="ai-result">
+                        <p>2. The forensics technician pulls Sarah aside, revealing that trace evidence links this case to another detective's unsolved cases from five years ago - before Sarah joined the force.</p>
+                        <div class="ai-result-actions">
+                            <button class="action-btn">Insert</button>
+                            <button class="action-btn">Expand</button>
+                        </div>
+                    </div>
+                    <div class="ai-result">
+                        <p>3. Sarah recognizes the victim despite the lack of ID - it's someone connected to her personal life, forcing her to question whether she's being targeted specifically.</p>
+                        <div class="ai-result-actions">
+                            <button class="action-btn">Insert</button>
+                            <button class="action-btn">Expand</button>
+                        </div>
+                    </div>
+                    <button class="button" style="margin-top: 1rem;">Generate More Ideas</button>
+                `;
+            } else if (type === 'twist' && option.includes('Unexpected betrayal')) {
+                responseContent = `
+                    <h3>Unexpected Betrayal - Ideas:</h3>
+                    <div class="ai-result">
+                        <p>Sarah's long-time partner on the force has been tampering with evidence to protect someone connected to the murders - perhaps a family member or someone who has leverage over them.</p>
+                        <div class="ai-result-actions">
+                            <button class="action-btn">Insert</button>
+                            <button class="action-btn">Expand</button>
+                        </div>
+                    </div>
+                    <div class="ai-result">
+                        <p>The forensics technician has been subtly altering reports to mislead the investigation, having been blackmailed by the real killer who has information that could destroy their career.</p>
+                        <div class="ai-result-actions">
+                            <button class="action-btn">Insert</button>
+                            <button class="action-btn">Expand</button>
+                        </div>
+                    </div>
+                    <div class="ai-result">
+                        <p>A victim Sarah helped earlier and believed to be innocent is actually orchestrating the killings, using Sarah's protection as the perfect cover to continue their crimes.</p>
+                        <div class="ai-result-actions">
+                            <button class="action-btn">Insert</button>
+                            <button class="action-btn">Expand</button>
+                        </div>
+                    </div>
+                    <button class="button" style="margin-top: 1rem;">Generate More Ideas</button>
+                `;
+            } else if (type === 'describe' && option.includes('Character description')) {
+                responseContent = `
+                    <h3>Character Description - Detective Sarah Miller:</h3>
+                    <div class="ai-result">
+                        <p>Detective Sarah Miller carried herself with the watchful intensity of someone who'd seen too much. Streaks of premature gray threaded through her dark brown hair, which she kept pulled back in a practical ponytail. Her eyes, a sharp hazel that missed nothing, had faint lines at the corners—evidence of both rare smiles and frequent concentration. She dressed for functionality rather than fashion: dark slacks, sensible boots that could handle a pursuit, and a navy blazer that concealed her service weapon. The silver detective's badge clipped to her belt had become more a part of her identity than an accessory. A thin scar ran along her right jawline—a souvenir from her rookie days that she never bothered to explain to new colleagues.</p>
+                        <div class="ai-result-actions">
+                            <button class="action-btn">Insert</button>
+                            <button class="action-btn">Regenerate</button>
+                            <button class="action-btn">Modify</button>
+                        </div>
+                    </div>
+                    <button class="button" style="margin-top: 1rem;">Generate Alternative</button>
+                `;
+            } else {
+                responseContent = `
+                    <h3>AI Response:</h3>
+                    <div class="ai-result">
+                        <p>Generated content for: ${option}</p>
+                        <p>This is a simulation of AI-generated content that would be tailored to your story and the specific option you selected.</p>
+                        <div class="ai-result-actions">
+                            <button class="action-btn">Insert</button>
+                            <button class="action-btn">Regenerate</button>
+                            <button class="action-btn">Modify</button>
+                        </div>
+                    </div>
+                    <button class="button" style="margin-top: 1rem;">Generate Alternative</button>
+                `;
+            }
+            
+            document.getElementById('panel-content').innerHTML = responseContent;
+            
+            // Add event listeners to action buttons
+            document.querySelectorAll('.action-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (btn.textContent === 'Insert') {
+                        // Simulate inserting text into the editor
+                        alert('Content would be inserted into your document at cursor position');
+                    } else if (btn.textContent === 'Regenerate') {
+                        // Simulate regenerating content
+                        alert('Regenerating alternative content...');
+                    } else if (btn.textContent === 'Expand') {
+                        // Simulate expanding the idea
+                        alert('Expanding this idea with more details...');
+                    } else if (btn.textContent === 'Modify') {
+                        // Simulate modifying content
+                        alert('Opening modification options...');
+                    }
+                });
+            });
+        }
+
+        // Set up event listeners for the tool buttons
+        document.getElementById('brainstorm-btn').addEventListener('click', function() {
+            document.getElementById('ai-panel').style.display = 'block';
+            generateAIContent('brainstorm');
+            setActiveButton(this);
+        });
+
+        document.getElementById('twist-btn').addEventListener('click', function() {
+            document.getElementById('ai-panel').style.display = 'block';
+            generateAIContent('twist');
+            setActiveButton(this);
+        });
+
+        document.getElementById('expand-btn').addEventListener('click', function() {
+            document.getElementById('ai-panel').style.display = 'block';
+            generateAIContent('expand');
+            setActiveButton(this);
+        });
+
+        document.getElementById('describe-btn').addEventListener('click', function() {
+            document.getElementById('ai-panel').style.display = 'block';
+            generateAIContent('describe');
+            setActiveButton(this);
+        });
+
+        document.getElementById('close-panel').addEventListener('click', function() {
+            document.getElementById('ai-panel').style.display = 'none';
+            resetActiveButtons();
+        });
+
+        // Function to set active button
+        function setActiveButton(button) {
+            resetActiveButtons();
+            button.classList.add('active');
+        }
+
+        // Function to reset all active buttons
+        function resetActiveButtons() {
+            const buttons = document.querySelectorAll('.tool-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+        }
+
+        // Initialize with AI panel hidden
+        document.getElementById('ai-panel').style.display = 'none';
+    </script>
+</body>
+</html>
