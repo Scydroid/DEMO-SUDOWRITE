@@ -1,7 +1,7 @@
 #
 
 ## 🌟 Disclaimer
-
+#     deosnt works i have only done a minimal work in front end and the back end is untouched
 This is an experimental project and is still in the **beta phase**. Expect bugsSudowrite Clone
 
 ## 🚀 Project Overview
